@@ -181,8 +181,9 @@ var Game = function() {
     }
   }.bind(this);
   this.askForHighScore = function() {
+    var initials = Cookies.get('initials') || ""
     // fade in modal asking for name for hscore list
-    var $scorePrompt = $('<div class="hs-prompt"></div>').html('<input type="text" id="initials" placeholder="initials" value="' + Cookies.get('initials') + '" maxlength="3"><button id="submit-hs">Submit Score</button><button id="cancel">Cancel</button>').appendTo($('body'));
+    var $scorePrompt = $('<div class="hs-prompt"></div>').html('<input type="text" id="initials" placeholder="initials" value="' + initials + '" maxlength="3"><button id="submit-hs">Submit Score</button><button id="cancel">Cancel</button>').appendTo($('body'));
     // add event listener on modal button that will:
     var $submitBtn = $scorePrompt.find('#submit-hs');
     var $cancelBtn = $scorePrompt.find('#cancel');
