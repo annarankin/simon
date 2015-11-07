@@ -6,6 +6,7 @@
   <link href='https://fonts.googleapis.com/css?family=VT323' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/jquery2.1.4.js"></script>
+  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
   <script src="js/main.js"></script>
 </head>
 <body>
@@ -17,19 +18,28 @@
       <h1>Current Score: <span id="current-score"></span></h1>
     </div>
   </div>
-  <div class="container">
-    <div class="game-container">
-      <div class="center">
-        <div id="start"><span>Start</span></div>
-      </div>
-      <div class="buttons">
-        <div class="button"></div>
-        <div class="button"></div>
-        <div class="button"></div>
-        <div class="button"></div>
+    
+  <div class="wrapper">
+
+    <aside class="scores">
+      <h2>Global Highscores</h2>  
+      <ol id="scores"></ol>    
+    </aside>
+
+    <div class="container">
+      <div class="game-container">
+        <div class="center">
+          <div id="start"><span>Start</span></div>
+        </div>
+        <div class="buttons">
+          <div class="button"></div>
+          <div class="button"></div>
+          <div class="button"></div>
+          <div class="button"></div>
+        </div>
       </div>
     </div>
-  </div>
 
+  </div>
 </body>
 </html>

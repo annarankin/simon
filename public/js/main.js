@@ -2,6 +2,45 @@
 
 console.log('main.js linked and ready');
 
+// High score board constructor - responsible fore keep global high scores synced with Firebase
+var ScoreBoard = function() {
+  this.dataRef = new Firebase('https://annasimongame.firebaseio.com');
+  this.$scoreList = $('#scores');
+  this.scores = [];
+  this.game;
+  this.addNewScore = function(initials) {
+    var dataObj = {}
+    dataObj.initials = initials || "???";
+    dataObj.score = this.game.currentScore;
+    this.dataRef.push(dataObj);
+  };
+  this.handleNewScore = function(snapshot) {
+    var record = snapshot.val();
+    this.scores.push(record);
+    this.scores.sort(function(a, b) {
+      return b.score - a.score;
+    });
+    this.renderScores();
+
+  }.bind(this);
+  this.renderScores = function() {
+    this.$scoreList.text('');
+    this.scores.forEach(function(record) {
+      var score;
+      if (record.score < 10) {
+        score = "00" + record.score;
+      } else if (record.score > 9 && record.score < 100) {
+        score = "0" + record.score;
+      } else {
+        score = record.score;
+      }
+    $('<li></li>').text(score + " - " + record.initials).appendTo(this.$scoreList);
+    }.bind(this));
+  }.bind(this);
+  // Listen for scores from FB
+  this.dataRef.on('child_added', this.handleNewScore);
+};
+
 // Creates my Board constructor - responsible for the board's DOM stuff.
 var Board = function() {
   this.highScore = 0;
@@ -22,8 +61,8 @@ var Board = function() {
   this.updateScores = function(curr, high) {
     this.game.currentScore = curr;
     this.highScore = high;
-    console.log('High Score: %s', this.highScore);
-    console.log('Current Score: %s', this.game.currentScore);
+    // console.log('High Score: %s', this.highScore);
+    // console.log('Current Score: %s', this.game.currentScore);
     if (this.highScore < this.game.currentScore) {
       this.highScore = this.game.currentScore;
     }
@@ -83,17 +122,19 @@ var Game = function() {
     this.currentScore = 0;
   };
   this.board = new Board();
+  this.scoreBoard = new ScoreBoard();
   this.board.game = this;
+  this.scoreBoard.game = this;
   this.playCompSeq = function() {
     if (this.compCounter >= this.compSeq.length) {
       // it's now user's turn - they can click again
       this.board.$buttons.on('click', this.handleClick);
       this.compCounter = 0;
       // notify user it's their turn
-      console.log('User turn');
+      // console.log('User turn');
     } else {
       // light up the current button, then call yourself on a setTimeout
-      console.log('Lighting up current button. compCounter: %s', this.compCounter);
+      // console.log('Lighting up current button. compCounter: %s', this.compCounter);
       this.board.lightUp(this.compSeq[this.compCounter]);
       this.compCounter++;
       window.setTimeout(this.playCompSeq.bind(this), 700);
@@ -106,19 +147,17 @@ var Game = function() {
     // add user's choice to current game's userSeq array
     this.userSeq.push(userChoice);
     // check to see if user choice matches computer entry
-    console.log('Counter: %s', this.userCounter);
-    console.log('Comp Counter: %s', this.compCounter);
-    console.log(this.compSeq)
-    console.log(this.userSeq)
+    // console.log('Counter: %s', this.userCounter);
+    // console.log('Comp Counter: %s', this.compCounter);
+    // console.log(this.compSeq)
+    // console.log(this.userSeq)
     if (this.userSeq[this.userCounter] === this.compSeq[this.userCounter]) {
-      console.log('Not wrong!')
+      // console.log('Not wrong!')
       // they got it right! Check if arrays are same length.
       // If not, increment game counter. If so, they've won.
       if (this.userSeq.length === this.compSeq.length) {
         this.currentScore++;
-        console.log('From the game! Current Score:', this.currentScore)
         this.board.updateScores(this.currentScore, this.board.highScore);
-        console.log('Yay you did it.');
         this.compSeq.push(this.board.randomButton());
         this.userSeq = [];
         this.userCounter = 0;
@@ -130,14 +169,45 @@ var Game = function() {
       }
     // if the user's choice doesn't match the computer's choice, they've lost.
     } else {
-      console.log('You done lost.');
+      // User has lost
+      this.askForHighScore();
       this.board.$startButtonSpan.text('Replay?');
       this.board.lightCycleTimerId = this.board.cycleLights(150,100);
       this.board.$startButton.one('click', this.startGame.bind(this));
       this.board.$buttons.off()
-      this.currentScore = 0;
     }
   }.bind(this);
+  this.askForHighScore = function() {
+    // fade in modal asking for name for hscore list
+    var $scorePrompt = $('<div class="hs-prompt"></div>').html('<input type="text" id="initials" placeholder="initials" maxlength="3"><button id="submit-hs">Submit Score</button><button id="cancel">Cancel</button>').appendTo($('body'));
+    // add event listener on modal button that will:
+    var $submitBtn = $scorePrompt.find('#submit-hs');
+    var $cancelBtn = $scorePrompt.find('#cancel');
+    var $initialsInput = $scorePrompt.find('#initials')
+    var submitScore = function(e) {
+      if (e.keyCode && e.keyCode !== 13) {
+        return;
+      }
+      // grab current score & user's initials
+      var initials = $initialsInput.val().toUpperCase();
+      // then send them to Firebase
+      this.scoreBoard.addNewScore(initials);
+      // then get rid of modal.
+      $scorePrompt.remove();
+      $cancelBtn.off();
+      $initialsInput.off()
+    }.bind(this)
+
+    $submitBtn.one('click', submitScore);
+    $initialsInput.on('keypress', submitScore)
+    $cancelBtn.one('click', function() {
+      $scorePrompt.remove();
+      $submitBtn.off();
+      $initialsInput.off()
+    });
+
+    $('#initials').focus();
+  };
   this.startGame = function() {
     console.log('Initializing game');
     this.board.stopLightCycle(this.board.lightCycleTimerId);
