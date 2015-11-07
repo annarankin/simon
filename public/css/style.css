@@ -1,5 +1,5 @@
 body{
-    background-color: #555;
+    background-color: #000;
     font-family: 'VT323', monospace;
     color: #FFF;
     margin: 0;
@@ -12,10 +12,22 @@ div {
   display: flex;
   margin: 0;
   padding:0;
+  max-width: 800px;
+  background-color: #555;
+  margin: 0 auto;
 }
 .scores {
   background-color:#000;
   padding: 1em;
+}
+.scores li:first-child {
+  color: #22F;
+}
+.scores li:nth-child(2) {
+  color: #0F0;
+}
+.scores li:nth-child(3) {
+  color: #FF0;
 }
 .container {
   margin: 3em auto;
@@ -159,4 +171,39 @@ div {
 }
 #cancel {
   color:red
+}
+
+@media all and (max-width:870px) {
+  .container {
+    height:400px;
+    width: 400px;
+    margin: 10px auto;
+  }
+  .game-container {
+    width: 400px;
+    height: 400px;
+    padding: 15px;
+  }
+  .wrapper {
+    flex-direction: column;
+  }
+  .scores {
+    order: 2;
+    text-align: center;
+  }
+  .scores ol {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-around;
+  }
+  .scores ol li {
+    padding: 0.5em
+  }
+  .hs-prompt {
+    width: 80%;
+    left: 10%;
+  }
+  #start span {
+    font-size: 2em;
+  }
 }
