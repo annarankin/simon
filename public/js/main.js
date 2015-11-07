@@ -34,7 +34,7 @@ var ScoreBoard = function() {
       } else {
         score = record.score;
       }
-    $('<li></li>').text(score + " - " + record.initials).appendTo(this.$scoreList);
+      $('<li></li>').text(score + " - " + record.initials).appendTo(this.$scoreList);
     }.bind(this));
   }.bind(this);
   // Listen for scores from FB
@@ -55,7 +55,8 @@ var Board = function() {
   this.game;
   this.initialize = function() {
     this.$startButton.one('click', this.game.startGame.bind(this.game));
-    this.updateScores(0,0);
+    var highScore = parseInt(Cookies.get('highScore')) || 0;
+    this.updateScores(0, highScore);
     this.lightCycleTimerId = this.cycleLights(150, 100);
   };
   this.updateScores = function(curr, high) {
@@ -65,6 +66,8 @@ var Board = function() {
     // console.log('Current Score: %s', this.game.currentScore);
     if (this.highScore < this.game.currentScore) {
       this.highScore = this.game.currentScore;
+      // set a cooooookie
+      Cookies.set('highScore', this.highScore);
     }
     this.$highScore.text(this.highScore);
     this.$currentScore.text(this.game.currentScore);
@@ -96,9 +99,9 @@ var Board = function() {
     duration = duration || 500;
     speed = speed || 500;
     // Set up order of buttons
-    var buttonOrder = order || [0,1,3,2];
+    var buttonOrder = order || [0, 1, 3, 2];
     var currBtnIdx = 0;
-    
+
     var lightTimerId = window.setInterval(function() {
       this.silentLightUp(buttonOrder[currBtnIdx], duration);
       currBtnIdx++;
@@ -167,19 +170,19 @@ var Game = function() {
       } else {
         this.userCounter++;
       }
-    // if the user's choice doesn't match the computer's choice, they've lost.
+      // if the user's choice doesn't match the computer's choice, they've lost.
     } else {
       // User has lost
       this.askForHighScore();
       this.board.$startButtonSpan.text('Replay?');
-      this.board.lightCycleTimerId = this.board.cycleLights(150,100);
+      this.board.lightCycleTimerId = this.board.cycleLights(150, 100);
       this.board.$startButton.one('click', this.startGame.bind(this));
       this.board.$buttons.off()
     }
   }.bind(this);
   this.askForHighScore = function() {
     // fade in modal asking for name for hscore list
-    var $scorePrompt = $('<div class="hs-prompt"></div>').html('<input type="text" id="initials" placeholder="initials" maxlength="3"><button id="submit-hs">Submit Score</button><button id="cancel">Cancel</button>').appendTo($('body'));
+    var $scorePrompt = $('<div class="hs-prompt"></div>').html('<input type="text" id="initials" placeholder="initials" value="' + Cookies.get('initials') + '" maxlength="3"><button id="submit-hs">Submit Score</button><button id="cancel">Cancel</button>').appendTo($('body'));
     // add event listener on modal button that will:
     var $submitBtn = $scorePrompt.find('#submit-hs');
     var $cancelBtn = $scorePrompt.find('#cancel');
@@ -190,6 +193,7 @@ var Game = function() {
       }
       // grab current score & user's initials
       var initials = $initialsInput.val().toUpperCase();
+      Cookies.set('initials', initials);
       // then send them to Firebase
       this.scoreBoard.addNewScore(initials);
       // then get rid of modal.
@@ -216,7 +220,7 @@ var Game = function() {
     this.board.updateScores(this.currentScore, this.board.highScore);
     this.initialize();
     this.compSeq.push(this.board.randomButton());
-    window.setTimeout(this.playCompSeq.bind(this), 1000); 
+    window.setTimeout(this.playCompSeq.bind(this), 1000);
   };
 };
 
@@ -226,7 +230,3 @@ $(function() {
   game = new Game();
   game.board.initialize();
 });
-
-
-
-
