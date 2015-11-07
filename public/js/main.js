@@ -1,8 +1,8 @@
-
-
+// Piano audio - https://www.freesound.org/people/Tesabob2001/packs/12995/
 
 console.log('main.js linked and ready');
 
+// Creates my Board constructor - responsible for the board's DOM stuff.
 var Board = function() {
   this.highScore = 0;
   this.$buttons = $('.button');
