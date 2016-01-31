@@ -43,6 +43,7 @@ var ScoreBoard = function() {
 
 // Creates my Board constructor - responsible for the board's DOM stuff.
 var Board = function() {
+  // hide info in closure
   this.highScore = 0;
   this.$buttons = $('.button');
   this.$highScore = $('#high-score');
@@ -225,9 +226,8 @@ var Game = function() {
   };
 };
 
-var game;
-
 $(function() {
+  // var game = new Game();
   game = new Game();
   game.board.initialize();
 });
